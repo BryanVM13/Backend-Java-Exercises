@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -14,64 +15,89 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+
 import be.vinci.pae.domain.Text;
 
 public class DataServiceTextCollection {
-	
 	private static final String DB_FILE_PATH = "db.json";
 	private static final String COLLECTION_NAME = "texts";
 	private final static ObjectMapper jsonMapper = new ObjectMapper();
-	
-	private static List<Text> texts;
+
+	private static List<Text> texts ;
 	static {
-		texts = LoadDataFromFile();
-	}
-	
-	
+		texts = loadDataFromFile();
+	}	
+
 	public static Text getText(int id) {
 		return texts.stream().filter(item -> item.getId() == id).findAny().orElse(null);
 	}
-	
-	public static List<Text> getText(){
+
+	public static List<Text> getTexts() {
 		return texts;
 	}
-	
+
+	public static List<Text> getTexts(String level) {
+		return texts.stream().filter(item -> item.getLevel().contentEquals(level)).collect(Collectors.toList());
+	}
+
 	public static Text addText(Text text) {
-		text.setId(nextTextId());
-		
-		text.setContent(StringEscapeUtils.escapeHtml4(text.getContent()));
-		text.setLevel(StringEscapeUtils.escapeHtml4(text.getLevel()));
-		
+		text.setId(nextTextId());		
+		// escape dangerous chars to protect against XSS attacks
+		text.setContent(StringEscapeUtils.escapeHtml4(text.getContent()));		
 		texts.add(text);
 		saveDataToFile();
 		return text;
 	}
-	
+
 	public static int nextTextId() {
-		if(texts.size() == 0)
+		if (texts.size() == 0)
 			return 1;
-		return texts.get(texts.size() - 1).getId() +1;
+		return texts.get(texts.size() - 1).getId() + 1;
 	}
-	
-	
-	
-	private static List<Text> LoadDataFromFile() {
+
+	public static Text deleteText(int id) {
+		if (texts.size() == 0 | id == 0)
+			return null;
+		Text itemToDelete = getText(id);
+		if (itemToDelete == null)
+			return null;
+		int index = texts.indexOf(itemToDelete);
+		texts.remove(index);
+		saveDataToFile();
+		return itemToDelete;
+	}
+
+	public static Text updateText(Text text) {
+		if (texts.size() == 0 | text == null)
+			return null;
+		Text itemToUpdate = getText(text.getId());
+		if (itemToUpdate == null)
+			return null;
+		// escape dangerous chars to protect against XSS attacks
+		text.setContent(StringEscapeUtils.escapeHtml4(text.getContent()));			
+		// update the data structure
+		int index = texts.indexOf(itemToUpdate);
+		texts.set(index, text);
+		saveDataToFile();
+		return text;
+	}
+
+	private static List<Text> loadDataFromFile() {
 		try {
 			JsonNode node = jsonMapper.readTree(Paths.get(DB_FILE_PATH).toFile());
 			JsonNode collection = node.get(COLLECTION_NAME);
-			if(collection == null) {
+			if (collection == null)
 				return new ArrayList<Text>();
-			}
 			return jsonMapper.readerForListOf(Text.class).readValue(node.get(COLLECTION_NAME));
-			
-		} catch(FileNotFoundException e) {
+
+		} catch (FileNotFoundException e) {
 			return new ArrayList<Text>();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			return new ArrayList<Text>();
 		}
 	}
-	
+
 	private static void saveDataToFile() {
 		try {
 
@@ -102,5 +128,6 @@ public class DataServiceTextCollection {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 }

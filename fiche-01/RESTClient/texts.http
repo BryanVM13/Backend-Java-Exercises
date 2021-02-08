@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:8080/texts
+
+### View all texts : GET texts
+GET {{baseUrl}}
+
+
+### Add a text : POST texts
+POST {{baseUrl}}
+Content-Type: application/json
+
+{    
+    "content":"this is a very easy text",
+    "level": "easy"    
+}
+
+### Add another text with wrong level, check that the text is not added : POST texts
+POST {{baseUrl}}
+Content-Type: application/json
+
+{    
+    "content":"this is a medium and magical text @here",
+    "level": "magical"    
+}
+
+### Add another text : POST texts
+POST {{baseUrl}}
+Content-Type: application/json
+
+{    
+    "content":"this is a medium and magical text @here",
+    "level": "easy"    
+}
+
+### Update text with ID == 2 : PUT id/{id}
+
+PUT {{baseUrl}}/2
+Content-Type: application/json
+
+{    
+    "content":"this is a medium and magical text @here",
+    "level": "medium"    
+}
+
+### Update text with ID == 2 and wrong level (check that no update is performed) : PUT id/{id}
+
+PUT {{baseUrl}}/2 
+Content-Type: application/json
+
+{    
+    "content":"this is a medium and magical text @here",
+    "level": "weird"    
+}
+
+### View all texts with level == "easy" : GET texts?level=value
+GET {{baseUrl}}?level=easy
+
+### Delete the text with ID == 2 : DELETE texts/{id}
+DELETE {{baseUrl}}/2
+
+### Read text with ID == 1 : GET texts/{id}
+GET {{baseUrl}}/1
+
+
+### Add a text with dangerous content : POST texts
+POST {{baseUrl}}
+Content-Type: application/json
+
+{    
+    "content": "<img src='#' onerror='alert(66666)'>", 
+    "level":"hard"
+}

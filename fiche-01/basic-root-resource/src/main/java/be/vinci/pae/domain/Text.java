@@ -3,33 +3,37 @@ package be.vinci.pae.domain;
 import java.util.Arrays;
 
 public class Text {
-	
 	private int id;
 	private String content;
-	private static final String [] POSSIBLE_LEVELS = {"easy","medium","hard"};
+	private final static String[] POSSIBLE_LEVELS = { "easy", "medium", "hard" };
 	private String level;
-	
-	
+
 	public int getId() {
 		return id;
 	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	public String getContent() {
 		return content;
 	}
+
 	public void setContent(String content) {
 		this.content = content;
 	}
+
 	public String getLevel() {
 		return level;
 	}
+
 	public void setLevel(String level) {
 		this.level = Arrays.stream(POSSIBLE_LEVELS).filter(possibleLevel -> possibleLevel.equals(level)).findFirst()
 				.orElse(null);
+
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -37,6 +41,7 @@ public class Text {
 		result = prime * result + id;
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -50,9 +55,10 @@ public class Text {
 			return false;
 		return true;
 	}
-	
-	
-	
-	
+
+	@Override
+	public String toString() {
+		return "Text [id=" + id + ", content=" + content + ", level=" + level + "]";
+	}
 
 }
